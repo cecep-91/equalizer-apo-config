@@ -1,0 +1,10 @@
+# Bass-bypass mask — PRE stage (runs BEFORE HeSuVi).
+# Grabs clean stereo bass into spare channels so it skips all HeSuVi processing.
+Include: mask-switch.txt
+If: mask
+  Copy: BASSL=L BASSR=R
+  Channel: BASSL BASSR
+  Filter: ON LP Fc `xover` Hz
+  Filter: ON LP Fc `xover` Hz
+  Channel: L R
+EndIf:

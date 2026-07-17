@@ -1,0 +1,12 @@
+# Bass-bypass mask — POST stage (runs AFTER HeSuVi).
+# Strips the bass from the virtualized output and adds the clean dry bass back.
+# LR4 high-pass here + LR4 low-pass in mask-pre sum flat = seamless crossover.
+If: mask
+  Channel: L R
+  Filter: ON HP Fc `xover` Hz
+  Filter: ON HP Fc `xover` Hz
+  Channel: BASSL BASSR
+  Preamp: `bassgain` dB
+  Delay: `bassdelay` ms
+  Copy: L=L+BASSL R=R+BASSR
+EndIf:

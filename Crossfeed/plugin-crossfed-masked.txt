@@ -1,0 +1,30 @@
+# ============================================================================
+# BS2BR crossfeed, MASKED to below 400 Hz only.
+# BS2BR's internal crossfeed corner is fixed (~650 Hz via FCut 0.205882) and
+# can't be lowered, so instead the signal is split at 400 Hz with LR4 pairs:
+# lows go through the plugin, highs bypass completely untouched.
+# Both LR4 splits sum flat and BS2B adds no latency -> seamless recombine.
+# The old "HSC 650 Hz +1 dB" treble compensation is dropped on purpose:
+# treble no longer passes through the plugin, so there is nothing to fix.
+# ============================================================================
+Eval: cfx=400
+
+Channel: L R
+Copy: CFHI_L=L CFHI_R=R
+
+# highs: dry bypass (LR4 high-pass)
+Channel: CFHI_L CFHI_R
+Filter: ON HP Fc `cfx` Hz
+Filter: ON HP Fc `cfx` Hz
+
+# lows: LR4 low-pass, then BS2BR crossfeed on L/R
+Channel: L R
+Filter: ON LP Fc `cfx` Hz
+Filter: ON LP Fc `cfx` Hz
+VSTPlugin: Library "..\config\BS2BR VST 1.0\BS2BR VST Plugin\BS2BR 64-bit.dll" Feed 0.371429 FCut 0.252941 Defs 0.25
+# BS2B trims its output a little for clipping headroom. If the low band ends
+# up quieter than the highs (a thin step right at 400 Hz), lift it back here:
+# Preamp: 1 dB
+
+# recombine: crossfed lows + dry highs
+Copy: L=L+CFHI_L R=R+CFHI_R

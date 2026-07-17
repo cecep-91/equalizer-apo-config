@@ -1,0 +1,22 @@
+# ============================================================================
+# BASS-BYPASS MASK  —  switch & settings (edit THIS file to turn it on/off)
+# ============================================================================
+# true  = ON : bass below 'xover' skips HeSuVi (tight bass, no virt. decay)
+# false = OFF: normal full-range HeSuVi virtualization
+Eval: mask=true
+
+# Crossover frequency in Hz. Bass below this bypasses HeSuVi virtualization.
+Eval: xover=150
+
+# Level-match the dry bass to the virtualized band. MEASURED from none.wav
+# (ipsi=1.0, contra=0.0, center=0.5): mono/centered bass through HeSuVi is
+# EXACTLY 1.0x, so 0 dB is the true match. Only stereo-side bass is hotter
+# (+2.5 dB on side content), which reads as width, not loudness. Keep this
+# at 0-1 dB max; higher makes centered bass boom. If bass feels thin, widen
+# the crossfeed low band instead (0.76/0.24 -> 0.85/0.15).
+Eval: bassgain=0
+
+# Time-align the dry bass to a REAL HRIR's convolution latency.
+# Keep 0 for hrir\none.wav. If you load a real HRIR and hear a thin spot
+# around the crossover, raise this to about 1-5 (milliseconds).
+Eval: bassdelay=0
