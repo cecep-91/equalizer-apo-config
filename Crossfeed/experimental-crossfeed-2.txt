@@ -1,0 +1,16 @@
+Channel: all
+Copy: HI_L=L HI_R=R XL=L XR=R
+
+Channel: HI_L HI_R
+Filter: ON HP Fc 400 Hz
+Filter: ON HP Fc 400 Hz
+
+Channel: XL XR
+Filter: ON LP Fc 400 Hz
+Filter: ON LP Fc 400 Hz
+# Preamp: 1 dB
+
+Channel: all
+Copy: LOW_L=XL+0.24*XR LOW_R=XR+0.24*XL
+
+Copy: L=HI_L+LOW_L R=HI_R+LOW_R
