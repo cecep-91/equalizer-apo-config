@@ -68,7 +68,7 @@ For IEMs I EQ to my own target: **[Ikuba91 Target v2.txt](Ikuba91%20Target%20v2.
 
 If your IEM is only measured on another rig/reviewer's database: AutoEQ it to **JM-1 with −1 dB/oct tilt** instead, then include [JM-1 Tilt -1dB to Ikuba91 Target v2 - 1k.txt](JM-1%20Tilt%20-1dB%20to%20Ikuba91%20Target%20v2%20-%201k.txt) on top — it's the correction layer that maps JM-1 −1 dB tilt onto my target.
 
-Both curves in one graph — normalized at 1 kHz. The two differ only below ~700 Hz, which is exactly why the bridge file only needs three low-frequency filters (and why it translates safely across measurement rigs):
+Image of `Ikuba91 Target v2` and `JM-1 -1dB/Oct Tilt` target curves in one graph:
 
 ![Ikuba91 Target v2 vs JM-1 with -1 dB/oct tilt](images/ikuba91-target-v2-vs-jm1-tilt.png)
 
