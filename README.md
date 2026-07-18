@@ -23,6 +23,9 @@ Download [HeSuVi](https://sourceforge.net/projects/hesuvi/) into `config\HeSuVi`
 - **Volume Adjustment:** everything `100`, LFE `200`
 - **Connection tab:** your output device on **Virtualization**
 
+![HeSuVi Virtualization tab — none.wav, positions front 30 / side -7 / rear 21, LFE 200](images/hesuvi-virtualization.png)
+![HeSuVi Connection tab — output device set to Virtualization](images/hesuvi-connection.png)
+
 Why `none.wav` instead of a real HRIR: `none.wav` is a dirac delta (ipsi = 1.0, contra = 0.0, center = 0.5), so the convolution stage adds **no HRTF coloration and no time smearing** — you keep the full, clearer resolution of the raw signal. But HeSuVi's matrix upmix + speaker-position mixdown still runs, and with the settings above it is *not* a pass-through. Working the actual coefficients through `matrix.txt` → `move.txt` → `mix.txt`, the output comes to:
 
 ```
@@ -47,6 +50,8 @@ Download the **BS2BR VST** (BS2B/mod VST2 by Resonic, [resonic.at](https://www.r
 
 Set the plugin to the **Jan Meier** preset — crossfeed level 9.5 dB, cutoff 650 Hz. That is exactly what the saved parameters in the configs encode (`Feed 0.607143` = 9.5 dB, `FCut 0.205882` = 650 Hz).
 
+![BS2BR VST plugin in Equalizer APO Configuration Editor](images/bs2b-plugin.png)
+
 But BS2B's internal crossfeed corner is fixed by the preset and can't be moved lower, so [Crossfeed\plugin-crossfed-masked.txt](Crossfeed/plugin-crossfed-masked.txt) masks the plugin instead of using it full-range: the signal is split with LR4 pairs at `cfx` Hz, only the lows go through BS2B, and the highs bypass completely untouched. Both LR4 splits sum flat and BS2B adds no latency, so the recombine is seamless. This gives **manual control of the crossfeed cutoff** rather than the non-configurable built-in corner.
 
 Default is `Eval: cfx=400` — my preference. Edit that one line to taste.
@@ -62,6 +67,10 @@ For IEMs I EQ to my own target: **[Ikuba91 Target v2.txt](Ikuba91%20Target%20v2.
 > ⚠️ The target is for **B&K 5128 measurements specifically from hangout — https://graph.hangout.audio/iem/5128/** — only. Do not use it against 711-coupler or other rigs' measurements.
 
 If your IEM is only measured on another rig/reviewer's database: AutoEQ it to **JM-1 with −1 dB/oct tilt** instead, then include [JM-1 Tilt -1dB to Ikuba91 Target v2 - 1k.txt](JM-1%20Tilt%20-1dB%20to%20Ikuba91%20Target%20v2%20-%201k.txt) on top — it's the correction layer that maps JM-1 −1 dB tilt onto my target.
+
+Both curves in one graph — normalized at 1 kHz. The two differ only below ~700 Hz, which is exactly why the bridge file only needs three low-frequency filters (and why it translates safely across measurement rigs):
+
+![Ikuba91 Target v2 vs JM-1 with -1 dB/oct tilt](images/ikuba91-target-v2-vs-jm1-tilt.png)
 
 ## Install
 
