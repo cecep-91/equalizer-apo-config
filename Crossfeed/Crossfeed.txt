@@ -1,5 +1,5 @@
-# Include: plugin-crossfed.txt
-Include: plugin-crossfed-masked.txt
+# BS2BR VST (Jan Meier: 650 Hz / 9.5 dB)
+Include: plugin-crossfed.txt
+
+# Backup: Native low-band crossfeed (<400 Hz)
 # Include: experimental-crossfeed-2.txt
-# Include: experimental-crossfeed.txt
-# Include: subbass-crossfed.txt

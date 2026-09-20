@@ -1,0 +1,15 @@
+# High-passed Mid/Side stereo enhancer (150 Hz crossover, +2.5 dB side lift)
+Eval: enhancer=true
+Eval: xover=150
+
+If: enhancer
+  Channel: L R
+  Copy: SIDE=0.17*L+-0.17*R
+
+  Channel: SIDE
+  Filter: ON HP Fc 150 Hz
+  Filter: ON HP Fc 150 Hz
+
+  Channel: L R
+  Copy: L=L+SIDE R=R+-1*SIDE
+EndIf:

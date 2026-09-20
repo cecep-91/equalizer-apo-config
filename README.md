@@ -1,81 +1,81 @@
-# Equalizer APO config — transparent "virtualization", punchy bass, masked BS2B crossfeed, IEM EQ
+# Equalizer APO Config — High-Passed Stereo Enhancer, BS2B Crossfeed & IEM Target EQ
 
-Documentation of my [Equalizer APO](https://sourceforge.net/projects/equalizerapo/) setup, with the shared config pieces included. The chain in [config.txt](config.txt) runs in this order:
+A streamlined, high-fidelity [Equalizer APO](https://sourceforge.net/projects/equalizerapo/) configuration providing wide ambience, punchy bass, fatigue-free VST crossfeed, and IEM frequency response correction.
 
-```
-Preamp -5 dB
-├─ mask-pre.txt        bass-bypass: grab clean stereo bass BEFORE HeSuVi
-├─ HeSuVi\hesuvi.txt   HeSuVi (none.wav — see why below)
-├─ mask-post.txt       bass-bypass: strip virtualized bass, add the clean bass back
-├─ Crossfeed\          BS2B crossfeed, masked to below 400 Hz
-└─ device EQ           frequency correction per IEM/headphone
-```
+The signal chain in [config.txt](config.txt) runs in this order:
 
-HeSuVi and the BS2BR VST are **not** included in this repo — download them (links below) and drop them next to these files.
-
-## 1. HeSuVi — `none.wav` on purpose
-
-Download [HeSuVi](https://sourceforge.net/projects/hesuvi/) into `config\HeSuVi` as usual, then set it up like this:
-
-- **Virtualization tab:** select `none.wav` under Common HRIRs
-- **Matrix Upmix:** Stereo ✔ and 5.1 ✔, Content Format: Automatic
-- **Speaker Position Adjustment:** front `30`, side `-7`, rear `21`
-- **Volume Adjustment:** everything `100`, LFE `200`
-- **Connection tab:** your output device on **Virtualization**
-
-![HeSuVi Virtualization tab — none.wav, positions front 30 / side -7 / rear 21, LFE 200](images/hesuvi-virtualization.png)
-![HeSuVi Connection tab — output device set to Virtualization](images/hesuvi-connection.png)
-
-Why `none.wav` instead of a real HRIR: `none.wav` is a dirac delta (ipsi = 1.0, contra = 0.0, center = 0.5), so the convolution stage adds **no HRTF coloration and no time smearing** — you keep the full, clearer resolution of the raw signal. But HeSuVi's matrix upmix + speaker-position mixdown still runs, and with the settings above it is *not* a pass-through. Working the actual coefficients through `matrix.txt` → `move.txt` → `mix.txt`, the output comes to:
-
-```
-L_out ≈ 1.17·L − 0.17·R      R_out ≈ 1.17·R − 0.17·L
+```text
+Preamp: -6 dB             (Safe digital headroom across all processing)
+├─ stereo-enhancer.txt    (High-passed Mid/Side widening: bit-perfect mono, punchy sub-150Hz bass, +2.5 dB ambience)
+├─ Crossfeed\             (BS2BR VST crossfeed, with experimental-crossfeed-2.txt as backup)
+└─ Device EQ              (Headphone/IEM profile: Ikuba91 Target v2)
 ```
 
-That means **mono/center content passes at exactly 1.0×** while **side/ambience (L−R) content is lifted ~+2.5 dB**. Low-level spatial cues — room tails, reverb, hard-panned micro detail — sit in that difference signal, so they become more audible. You get the "virtualization buff" of micro detail being more heard, without paying the resolution cost of a real HRIR.
+---
 
-## 2. Bass-bypass mask — keep the bass punchy
+## 1. High-Passed Stereo Enhancer (`stereo-enhancer.txt`)
 
-Even with the transparent setup above, letting bass run through the upmix/mixdown widens and softens it. The mask keeps low-end punch:
+Standard stereo widening often ruins low-frequency impact by diffusing mono bass. [stereo-enhancer.txt](stereo-enhancer.txt) solves this with a **high-passed Mid/Side (M/S) differential boost**:
 
-- [mask-pre.txt](mask-pre.txt) — before HeSuVi, copies the clean stereo bass into spare channels through an LR4 low-pass
-- [mask-post.txt](mask-post.txt) — after HeSuVi, LR4 high-passes the processed signal and adds the untouched dry bass back
-- [mask-switch.txt](mask-switch.txt) — the switch and settings: `mask=true/false`, crossover `xover=150` Hz, `bassgain`, `bassdelay`
+$$L_{out} = L + 0.17 \cdot \text{HP}_{150}(L - R)$$
+$$R_{out} = R - 0.17 \cdot \text{HP}_{150}(L - R)$$
 
-The LR4 low-pass + LR4 high-pass sum flat, so the crossover is seamless. Result: everything above 150 Hz gets the ambience lift, while the bass stays dry, tight, and punchy.
+- **Center & Mono ($L = R$)**: When a signal is centered (vocals, kick drums), $(L - R) = 0$. Centered content passes with **bit-perfect unity gain ($0\text{ dB}$), zero latency, and zero phase rotation**.
+- **Bass Below 150 Hz ($f < 150\text{ Hz}$)**: The high-pass filter attenuates the side-differential in the low end. Bass passes as direct, untouched stereo on the through path with full dynamic punch.
+- **Ambience & Micro-Details Above 150 Hz ($f > 150\text{ Hz}$)**: Stereo differential cues, room reverb tails, and panned instruments receive a smooth **$+2.54\text{ dB}$ widening lift**.
 
-## 3. Crossfeed — BS2B on Jan Meier, masked to <400 Hz
+---
 
-Download the **BS2BR VST** (BS2B/mod VST2 by Resonic, [resonic.at](https://www.resonic.at/)) into `config\BS2BR VST 1.0`.
+## 2. Crossfeed (`Crossfeed/`)
 
-Set the plugin to the **Jan Meier** preset — crossfeed level 9.5 dB, cutoff 650 Hz. That is exactly what the saved parameters in the configs encode (`Feed 0.607143` = 9.5 dB, `FCut 0.205882` = 650 Hz).
+Headphones provide 100% channel isolation between left and right ears, which causes listening fatigue on hard-panned mixes. Crossfeed introduces acoustic head-shadowing and interaural time delay to simulate natural loudspeaker listening.
+
+In [Crossfeed\Crossfeed.txt](Crossfeed/Crossfeed.txt):
+- **Active ([Crossfeed/plugin-crossfed.txt](Crossfeed/plugin-crossfed.txt))**: The 64-bit **BS2BR VST** plugin set to the **Jan Meier preset** (`Feed 0.607143` = 9.5 dB, `FCut 0.205882` = 650 Hz / 280 $\mu$s delay) with $+1.1\text{ dB}$ unity gain compensation.
+- **Backup ([Crossfeed/experimental-crossfeed-2.txt](Crossfeed/experimental-crossfeed-2.txt))**: Native low-band crossfeed (<400 Hz) using LR4 biquad pairs and cross-channel summing.
 
 ![BS2BR VST plugin in Equalizer APO Configuration Editor](images/bs2b-plugin.png)
 
-But BS2B's internal crossfeed corner is fixed by the preset and can't be moved lower, so [Crossfeed\plugin-crossfed-masked.txt](Crossfeed/plugin-crossfed-masked.txt) masks the plugin instead of using it full-range: the signal is split with LR4 pairs at `cfx` Hz, only the lows go through BS2B, and the highs bypass completely untouched. Both LR4 splits sum flat and BS2B adds no latency, so the recombine is seamless. This gives **manual control of the crossfeed cutoff** rather than the non-configurable built-in corner.
+---
 
-Default is `Eval: cfx=400` — my preference. Edit that one line to taste.
+## 3. Safe Gain Staging & Headroom
 
-[Crossfeed\Crossfeed.txt](Crossfeed/Crossfeed.txt) is the selector — in my local setup it can also switch to the unmasked plugin or experimental DIY crossfeeds (not included here); the masked include is the one that matters.
+In [config.txt](config.txt), the global preamp is set to:
 
-## 4. EQ — frequency correction
+```text
+Preamp: -6 dB
+```
 
-In my local setup each IEM/headphone has its own profile folder (`Hidizs MP145\`, `Tanchjim 4U\`, …) and [config.txt](config.txt) includes the active one — those profiles are personal, so they're not in this repo. Swap the `Include: Hidizs MP145\Hidizs MP145.txt` line in `config.txt` for your own EQ file.
+This ensures adequate headroom so that the $+2.54\text{ dB}$ side boost, crossfeed summing ($+1.5\text{ dB}$), and your IEM EQ filters do not cause digital clipping on full-scale tracks.
 
-For IEMs I EQ to my own target: **[Ikuba91 Target v2.txt](Ikuba91%20Target%20v2.txt)**.
+---
 
-> ⚠️ The target is for **B&K 5128 measurements specifically from hangout — https://graph.hangout.audio/iem/5128/** — only. Do not use it against 711-coupler or other rigs' measurements.
+## 4. IEM Target EQ & JM-1 Adapters
 
-If your IEM is only measured on another rig/reviewer's database: AutoEQ it to **JM-1 with −1 dB/oct tilt** instead, then include [JM-1 Tilt -1dB to Ikuba91 Target v2 - 1k.txt](JM-1%20Tilt%20-1dB%20to%20Ikuba91%20Target%20v2%20-%201k.txt) on top — it's the correction layer that maps JM-1 −1 dB tilt onto my target.
+### Target Curve: `Ikuba91 Target v2.txt`
+- Measured on Brüel & Kjær Type 5128 (ITU-T P.57 Type 4.3).
+- Clean sub-bass roll-off (<35 Hz), punchy mid-bass bump (50–80 Hz), lower-mid scoop (300 Hz), standard 3 kHz ear gain, and extended upper treble sparkle (7–15 kHz).
 
-Image of `Ikuba91 Target v2` and `JM-1 -1dB/Oct Tilt` target curves in one graph:
+### JM-1 Tilt Adapters
+If your IEM was AutoEQ'd on another database to **PopAvg-DF (JM-1) with -1 dB/octave tilt**:
+- **[JM-1 Tilt -1dB to Ikuba91 Target v2 - 1k.txt](JM-1%20Tilt%20-1dB%20to%20Ikuba91%20Target%20v2%20-%201k.txt)**: Adapts the low end (<1 kHz) while leaving treble untouched to avoid cross-coupler resonance variations.
+- **[JM-1 Tilt -1dB to Ikuba91 Target v2 - Full.txt](JM-1%20Tilt%20-1dB%20to%20Ikuba91%20Target%20v2%20-%20Full.txt)**: Full-spectrum adapter including the $+2.3\text{ dB}$ peak at 7.8 kHz and $+2.0\text{ dB}$ air shelf at 14 kHz.
 
 ![Ikuba91 Target v2 vs JM-1 with -1 dB/oct tilt](images/ikuba91-target-v2-vs-jm1-tilt.png)
 
-## Install
+---
 
-1. Install [Equalizer APO](https://sourceforge.net/projects/equalizerapo/)
-2. Copy this repo's contents into `C:\Program Files\EqualizerAPO\config`
-3. Download HeSuVi and the BS2BR VST into their folders as above
-4. Set HeSuVi's settings as in section 1
-5. Replace the device EQ include in `config.txt` with your own headphone/IEM correction
+## 5. Directory Contents
+
+```text
+config.txt                                      Main Equalizer APO entry point
+stereo-enhancer.txt                             Native High-Passed Mid/Side stereo widener
+Crossfeed/
+  Crossfeed.txt                                 Crossfeed selector
+  plugin-crossfed.txt                           BS2BR VST plugin (Jan Meier preset: 650 Hz / 9.5 dB)
+  plugin-crossfed-masked.txt                    BS2BR VST plugin masked below 400 Hz
+  experimental-crossfeed-2.txt                  Backup native crossfeed (<400 Hz)
+Ikuba91 Target v2.txt                           B&K 5128 IEM target curve
+JM-1 Tilt -1dB to Ikuba91 Target v2 - 1k.txt    Bass/lower-mid translation adapter (<1 kHz)
+JM-1 Tilt -1dB to Ikuba91 Target v2 - Full.txt  Full-spectrum translation adapter
+```

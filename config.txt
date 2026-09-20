@@ -1,16 +1,13 @@
-Preamp: -5 dB
-# Device:   
+Preamp: -6 dB
 
-Include: mask-pre.txt
-Include: HeSuVi\hesuvi.txt
-Include: mask-post.txt
+Include: stereo-enhancer.txt
 Include: Crossfeed\Crossfeed.txt
-# Filter: ON PK Fc 3000 Hz Gain -1 dB Q 2
-# Device:   all
 
-# Include: FiiO JT7\FiiO JT7.txt
-Include: Hidizs MP145\Hidizs MP145.txt
+# Device EQ
+# Include: Fiio JT7 Filters.txt
+# Include: Hidizs MP145\Hidizs MP145.txt
 # Include: Tanchjim 4U\Tanchjim 4U.txt
 
-# Include: JM-1 post-eq.txt
+# Target adapter (JM-1 -1dB/oct tilt to Ikuba91 Target v2)
 # Include: JM-1 Tilt -1dB to Ikuba91 Target v2 - 1k.txt
+# Include: JM-1 Tilt -1dB to Ikuba91 Target v2 - Full.txt

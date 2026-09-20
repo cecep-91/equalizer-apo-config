@@ -1,0 +1,4 @@
+# BS2BR VST - Jan Meier preset (650 Hz, 9.5 dB)
+Channel: L R
+VSTPlugin: Library "..\config\BS2BR VST 1.0\BS2BR VST Plugin\BS2BR 64-bit.dll" Feed 0.607143 FCut 0.205882 Defs 0.25
+Preamp: 1.1 dB
